@@ -24,8 +24,11 @@ app.get("/webhook",(req,res)=>{
         if(mode==="suscribe" && token===mytoken){
             res.status(200).send(challenge);
         }else{
-            res.status(403)
+            res.status(403).json({message:"error"}
+            )
          }
+    }else{
+        res.status(200).json({message:"hiii"})
     }
 })
 
