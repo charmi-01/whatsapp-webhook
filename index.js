@@ -50,7 +50,7 @@ app.post("/webhook",(req,res)=>{
             let phone_number_id= body_params.entry[0].changes[0].value.metadata.phone_number_id;
             let from= body_params.entry[0].changes[0].values.messages[0].from;
             let msg_body= body_params.entry[0].changes[0].value.messages[0].text.body;
-
+            
             axios({
                 method:"POST",
                 url:"https://graph.facebook.com/v13.0/"+phone_number_id+"/messages?access_token="+token,
@@ -66,7 +66,7 @@ app.post("/webhook",(req,res)=>{
                 }
             });
 
-            res.status(200).json({'from':from,"msg":msg_body})
+            res.sendStatus(200);
         }else{
             res.sendStatus(404);
         }
