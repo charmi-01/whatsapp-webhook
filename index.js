@@ -12,13 +12,16 @@ app.listen(8000,()=>{
     console.log("webhook is listening");
 });
 
+//to verify working
+app.get('/',(req,res)=>{
+    res.status(200).send("api is working")
+})
+
 //to verify the callback url from dashboard side -cloud api side 
 app.get("/webhook",(req,res)=>{
     let mode=req.query["hub.mode"];
     let challenge=req.query["hub.challenge"];
     let token=req.query["hub.verify_token"];
-
-   
 
     if(mode &&token){
         if(mode==="suscribe" && token===mytoken){
@@ -28,7 +31,7 @@ app.get("/webhook",(req,res)=>{
             )
          }
     }else{
-        res.status(200).json({message:"hiii"})
+        res.status(200).json({message:"connect to whatsapp api"})
     }
 })
 
@@ -55,7 +58,7 @@ app.post("/webhook",(req,res)=>{
                     messaging_product:"whatsapp",
                     to:from,
                     text:{
-                        body:'hii.. i am chirag'
+                        body:'hii.. i am chirag'+msg_body
                     }
                 },
                 headers:{
@@ -63,7 +66,7 @@ app.post("/webhook",(req,res)=>{
                 }
             });
 
-            res.sendStatus(200);
+            res.status(200).json({'from':from,"msg":msg_body})
         }else{
             res.sendStatus(404);
         }
