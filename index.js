@@ -47,7 +47,7 @@ app.post("/webhook",  (req, res) => {
         console.log(3)
         let phone_number_id = parsed.entry[0].changes[0].value.metadata.phone_number_id;
         console.log(phone_number_id)
-        let from = parsed.entry[0].changes[0].values.messages[0].from;
+        let from = parsed.entry[0].changes[0].value.messages[0].from;
         console.log(from)
         let msg_body = parsed.entry[0].changes[0].value.messages;
         console.log(msg_body)
