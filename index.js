@@ -4,7 +4,7 @@ const axios= require('axios')
 
 const app=express().use(body_parser.json()); 
 
-const token="EAAXQdCcZBoocBOx3HnWZCTUdK5QMjCK8ZAtvQHXYl2sO1UAlZBAOUeEj7N4ZA9bLTGV5htk4jL8a622dAmkctpyEtjTM9DIdZAi4L10JJ0grlaPnZC1hPMoFCgTznGWZCC9BI8PZCS75XvE1HPMH74BgcJR9Ju9xx6Shk5HB10arJsDNZAKEmcp2CILkhH85TEx7DtQhubnke03LD96AZDZD";
+const token="EAAXQdCcZBoocBO7zEzZBpzZBjmoXmA5TleynrxjSp4yLFXs2aWV1qe1ZBRA64ntXY6XVgaXrkEdjQROFmtj313yJtNUctdCFBtCBACKvZBIrzuk33ysGZBfuMSGQtcgA1VZCn5D4ojJrZBwNNgYzdzYGebgvwVfWdqSDZCg76U7IgGEpWLf2YYFtp8EPJjXv9BYEMn62ZCdZC33nw4VedPIqtPklMEHAhbZAirWYvIkZD"
 const mytoken="billfree";
 
 
@@ -35,7 +35,7 @@ app.get("/webhook",(req,res)=>{
     }
 })
 
-app.post("/webhook",(req,res)=>{
+app.post("/webhook",async (req,res)=>{
 
     let body_params=req.body;
 
@@ -51,7 +51,7 @@ app.post("/webhook",(req,res)=>{
             let from= body_params.entry[0].changes[0].values.messages[0].from;
             let msg_body= body_params.entry[0].changes[0].value.messages[0].text.body;
             
-            axios({
+            let response=await axios({
                 method:"POST",
                 url:"https://graph.facebook.com/v13.0/"+phone_number_id+"/messages?access_token="+token,
                 data:{
@@ -65,6 +65,7 @@ app.post("/webhook",(req,res)=>{
                     "Content-Type":"application/json"
                 }
             });
+            console.log(response)
 
             res.sendStatus(200);
         }else{
