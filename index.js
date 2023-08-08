@@ -35,7 +35,7 @@ app.get("/webhook", (req, res) => {
     }
 })
 
-app.post("/webhook",  (req, res) => {
+app.post("/webhook", async (req, res) => {
 
     const body_params = JSON.stringify(req.body, null, 2);
     console.log(body_params);
@@ -49,9 +49,9 @@ app.post("/webhook",  (req, res) => {
         console.log(phone_number_id)
         let from = parsed.entry[0].changes[0].value.messages[0].from;
         console.log(from)
-        let msg_body = parsed.entry[0].changes[0].value.messages;
+        let msg_body = parsed.entry[0].changes[0].value.messages[0].text.body;
         console.log(msg_body)
-        const response =  axios({
+        const response = await  axios({
             method: "POST",
             url: "https://graph.facebook.com/v13.0/" + phone_number_id + "/messages?access_token=" + token,
             data: {
@@ -67,6 +67,8 @@ app.post("/webhook",  (req, res) => {
         });
         console.log(response);
         res.sendStatus(200);
+    }else{
+        res.sendStatus(400);
     }
 
 })
