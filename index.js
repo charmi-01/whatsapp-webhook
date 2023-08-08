@@ -39,11 +39,11 @@ app.post("/webhook",  (req, res) => {
 
     let body_params = req.body;
 
-    console.log(JSON.stringify(body_params, null, 2));
+    console.log(body_params);
     console.log(1)
     if (body_params.object) {
         console.log(2);
-        console.log(body_params.entry)
+        console.log(body_params.entry[0])
         // if(body_params.entry && body_params.entry[0].changes && body_params.entry[0].changes[0].value.message && body_params.entry[0].changes[0].value.message[0])
         // {
         //     console.log(3);
