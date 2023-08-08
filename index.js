@@ -44,24 +44,28 @@ app.post("/webhook",  (req, res) => {
     if (parsed.entry) {
         console.log(2);
         console.log(parsed.entry[0].changes[0])
-        // let phone_number_id = body_params.entry[0].changes[0].value.metadata.phone_number_id;
-        // let from = body_params.entry[0].changes[0].values.messages[0].from;
-        // let msg_body = body_params.entry[0].changes[0].value.messages[0].text.body;
-        // const response =  axios({
-        //     method: "POST",
-        //     url: "https://graph.facebook.com/v13.0/" + phone_number_id + "/messages?access_token=" + token,
-        //     data: {
-        //         messaging_product: "whatsapp",
-        //         to: from,
-        //         text: {
-        //             body: 'hii.. i am chirag' + msg_body
-        //         }
-        //     },
-        //     headers: {
-        //         "Content-Type": "application/json"
-        //     }
-        // });
-        // console.log(response);
+        console.log(3)
+        let phone_number_id = parsed.entry[0].changes[0].value.metadata.phone_number_id;
+        console.log(4)
+        let from = parsed.entry[0].changes[0].values.messages[0].from;
+        console.log(5)
+        let msg_body = parsed.entry[0].changes[0].value.messages[0].text.body;
+        console.log(6)
+        const response =  axios({
+            method: "POST",
+            url: "https://graph.facebook.com/v13.0/" + phone_number_id + "/messages?access_token=" + token,
+            data: {
+                messaging_product: "whatsapp",
+                to: from,
+                text: {
+                    body: 'hii.. i am chirag' + msg_body
+                }
+            },
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+        console.log(response);
         res.sendStatus(200);
     }
 
