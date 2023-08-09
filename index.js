@@ -54,7 +54,7 @@ app.post("/webhook", async (req, res) => {
             var data = JSON.stringify({
                 "messaging_product": "whatsapp",
                 "recipient_type": "individual",
-                "to": '918924893308',
+                "to": from,
                 "type": "text",
                 "text": {
                     "body": "YOUR_MESSAGE_CONTENT:"
@@ -64,9 +64,9 @@ app.post("/webhook", async (req, res) => {
             var config = {
                 method: 'post',
                 maxBodyLength: Infinity,
-                url: 'https://graph.facebook.com/v17.0/114778888258379/messages?access-token='+token,
+                url: 'https://graph.facebook.com/v17.0/'+phone_number_id+'/messages',
                 headers: {
-                    // 'Authorization': token,
+                    'Authorization': 'Bearer '+token,
                     'Content-Type': 'application/json'
                 },
                 data: data
@@ -81,6 +81,7 @@ app.post("/webhook", async (req, res) => {
                 });
 
         }
+        res.sendStatus(200)
     } catch (error) {
         console.error("Error:", error);
         res.sendStatus(500);
