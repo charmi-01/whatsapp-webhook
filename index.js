@@ -51,61 +51,23 @@ app.post("/webhook", async (req, res) => {
             console.log(from)
             let msg_body = parsed.entry[0].changes[0].value.messages[0].text.body;
             console.log(msg_body)
-            // const response = await  axios({
-            //     method: "POST",
-            //     url: "https://graph.facebook.com/v13.0/" + phone_number_id + "/messages?access_token=" + token,
-            //     data: {
-            //         messaging_product: "whatsapp",
-            //         to: from,
-            //         text: {
-            //             body: 'hii.. i am chirag' + msg_body
-            //         }
-            //     },
-            //     headers: {
-            //         "Content-Type": "application/json"
-            //     }
-            // });
-            // console.log(response);
-            // res.sendStatus(200);
-            // try {
-            //     const response = await axios({
-            //         method: "POST",
-            //         url: "https://graph.facebook.com/v17.0/FROM_PHONE_NUMBER_ID/messages" ,
-            //         data: {
-            //             messaging_product: "whatsapp",
-            //             to: from,
-            //             type:'text',
-            //             text: {
-            //                 body: 'hii.. i am chirag' + msg_body
-            //             }
-            //         },
-            //         headers: {
-            //             "Content-Type": "application/json"
-            //         }
-            //     });
-            //     console.log(response.data); // Log response data
-            //     res.sendStatus(200);
-            // } catch (error) {
-            //     console.error("Axios Error:", error);
-            //     res.sendStatus(500);
-            // }
             var data = JSON.stringify({
                 "messaging_product": "whatsapp",
                 "recipient_type": "individual",
-                "to": from,
+                "to": '918924893308',
                 "type": "text",
                 "text": {
-                    "body": "YOUR_MESSAGE_CONTENT:" + msg_body
+                    "body": "YOUR_MESSAGE_CONTENT:"
                 }
             });
 
             var config = {
                 method: 'post',
                 maxBodyLength: Infinity,
-                url: `https://graph.facebook.com/v17.0/${phone_number_id}/messages`,
+                url: 'https://graph.facebook.com/v17.0/114778888258379/messages?access-token='+token,
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': token
+                    // 'Authorization': token,
+                    'Content-Type': 'application/json'
                 },
                 data: data
             };
