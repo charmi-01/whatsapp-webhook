@@ -67,27 +67,56 @@ app.post("/webhook", async (req, res) => {
             // });
             // console.log(response);
             // res.sendStatus(200);
-            try {
-                const response = await axios({
-                    method: "POST",
-                    url: "https://graph.facebook.com/v13.0/" + phone_number_id + "/messages?access_token=" + token,
-                    data: {
-                        messaging_product: "whatsapp",
-                        to: from,
-                        text: {
-                            body: 'hii.. i am chirag' + msg_body
-                        }
-                    },
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
+            // try {
+            //     const response = await axios({
+            //         method: "POST",
+            //         url: "https://graph.facebook.com/v17.0/FROM_PHONE_NUMBER_ID/messages" ,
+            //         data: {
+            //             messaging_product: "whatsapp",
+            //             to: from,
+            //             type:'text',
+            //             text: {
+            //                 body: 'hii.. i am chirag' + msg_body
+            //             }
+            //         },
+            //         headers: {
+            //             "Content-Type": "application/json"
+            //         }
+            //     });
+            //     console.log(response.data); // Log response data
+            //     res.sendStatus(200);
+            // } catch (error) {
+            //     console.error("Axios Error:", error);
+            //     res.sendStatus(500);
+            // }
+            var data = JSON.stringify({
+                "messaging_product": "whatsapp",
+                "recipient_type": "individual",
+                "to": from,
+                "type": "text",
+                "text": {
+                    "body": "YOUR_MESSAGE_CONTENT:" + msg_body
+                }
+            });
+
+            var config = {
+                method: 'post',
+                maxBodyLength: Infinity,
+                url: `https://graph.facebook.com/v17.0/${phone_number_id}/messages`,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token
+                },
+                data: data
+            };
+
+            axios(config)
+                .then(function (response) {
+                    console.log(JSON.stringify(response.data));
+                })
+                .catch(function (error) {
+                    console.log(error);
                 });
-                console.log(response.data); // Log response data
-                res.sendStatus(200);
-            } catch (error) {
-                console.error("Axios Error:", error);
-                res.sendStatus(500);
-            }
 
         }
     } catch (error) {
