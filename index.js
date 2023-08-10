@@ -68,7 +68,7 @@ app.post("/webhook", async (req, res) => {
                 url: 'https://graph.facebook.com/v17.0/'+phone_number_id+'/messages',
                 headers: { 
                   'Content-Type': 'application/json', 
-                  'Authorization': 'Bearer EAAXQdCcZBoocBO7zEzZBpzZBjmoXmA5TleynrxjSp4yLFXs2aWV1qe1ZBRA64ntXY6XVgaXrkEdjQROFmtj313yJtNUctdCFBtCBACKvZBIrzuk33ysGZBfuMSGQtcgA1VZCn5D4ojJrZBwNNgYzdzYGebgvwVfWdqSDZCg76U7IgGEpWLf2YYFtp8EPJjXv9BYEMn62ZCdZC33nw4VedPIqtPklMEHAhbZAirWYvIkZD'
+                  'Authorization': 'Bearer'+token
                 },
                 data : data
               };
