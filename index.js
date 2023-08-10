@@ -51,34 +51,35 @@ app.post("/webhook", async (req, res) => {
             console.log(from)
             let msg_body = parsed.entry[0].changes[0].value.messages[0].text.body;
             console.log(msg_body)
-            var data = JSON.stringify({
+            let data = JSON.stringify({
                 "messaging_product": "whatsapp",
                 "recipient_type": "individual",
-                "to": from,
+                "to": "918924803308",
                 "type": "text",
                 "text": {
-                    "body": "YOUR_MESSAGE_CONTENT:"
+                  "preview_url": false,
+                  "body": "MESSAGE_CONTENT"
                 }
-            });
-
-            var config = {
+              });
+              
+              let config = {
                 method: 'post',
                 maxBodyLength: Infinity,
                 url: 'https://graph.facebook.com/v17.0/'+phone_number_id+'/messages',
-                headers: {
-                    'Authorization': 'Bearer '+token,
-                    'Content-Type': 'application/json'
+                headers: { 
+                  'Content-Type': 'application/json', 
+                  'Authorization': 'Bearer EAAXQdCcZBoocBO7zEzZBpzZBjmoXmA5TleynrxjSp4yLFXs2aWV1qe1ZBRA64ntXY6XVgaXrkEdjQROFmtj313yJtNUctdCFBtCBACKvZBIrzuk33ysGZBfuMSGQtcgA1VZCn5D4ojJrZBwNNgYzdzYGebgvwVfWdqSDZCg76U7IgGEpWLf2YYFtp8EPJjXv9BYEMn62ZCdZC33nw4VedPIqtPklMEHAhbZAirWYvIkZD'
                 },
-                data: data
-            };
-
-            axios(config)
-                .then(function (response) {
-                    console.log(JSON.stringify(response.data));
-                })
-                .catch(function (error) {
-                    console.log(error);
-                });
+                data : data
+              };
+              
+              axios.request(config)
+              .then((response) => {
+                console.log(JSON.stringify(response.data));
+              })
+              .catch((error) => {
+                console.log(error);
+              });
 
         }
         res.sendStatus(200)
