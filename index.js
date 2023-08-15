@@ -49,12 +49,10 @@ app.post("/webhook", (req, res) => {
       let data = JSON.stringify({
         "messaging_product": "whatsapp",
         "to": from,
-        "type": "template",
-        "template": {
-          "name": "hello_world",
-          "language": {
-            "code": "en_US"
-          }
+        "type": "text",
+        "text": {
+            "preview_url": true,
+            "body": "your msg is : "+msg_body
         }
       });
       
