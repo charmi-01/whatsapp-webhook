@@ -4,7 +4,7 @@ const axios = require('axios')
 
 const app = express().use(body_parser.json());
 
-const token =process.env.TOKEN
+const token ='Bearer EAAXQdCcZBoocBO3sCFK1Sr9qphAYlCu938p1h3Y4SZBUZARKdyusiH0XjQkXt8orju3FuucsVA0DgsaqPiCoVZBNgpMxEtg336hRx3vfOf3rxhbGiF9xKM18zln5tBk6IeQ4uJMFuskl1Lj1spMrFHNsNRgXVyQl6RzEJX0a6O4KouCNZCqm0rxKe6VWATgIKFJKFz8BlMGcy7puA'
 const mytoken = "billfree";
 
 
@@ -46,28 +46,36 @@ app.post("/webhook", (req, res) => {
       let from = body_params.entry[0].changes[0].value.messages[0].from;
       let msg_body = body_params.entry[0].changes[0].value.messages[0].text.body;
 
-      axios({
-        method: 'POST',
-        url: "https://graph.facebook.com/v17.0/" + phon_no_id + "/messages?access_token=" + token,
-        data: {
-          messaging_product: "whatsapp",
-          to: from,
-          text: {
-            body: "Hiiii"
+      let data = JSON.stringify({
+        "messaging_product": "whatsapp",
+        "to": from,
+        "type": "template",
+        "template": {
+          "name": "hello_world",
+          "language": {
+            "code": "en_US"
           }
+        }
+      });
+      
+      let config = {
+        method: 'post',
+        maxBodyLength: Infinity,
+        url: 'https://graph.facebook.com/v16.0/'+phon_no_id+'/messages',
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Authorization': token
         },
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }).then(res=>{
-        console.log(res)
-      }
-      ).catch(
-        err=>{
-          console.log("error:")
-          console.log(err)
-        }
-      );
+        data : data
+      };
+      
+      axios.request(config)
+      .then((response) => {
+        console.log(JSON.stringify(response.data));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
 
       res.sendStatus(200);
     } else {
