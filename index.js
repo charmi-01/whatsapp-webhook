@@ -2,6 +2,7 @@ const express = require('express');
 const body_parser = require("body-parser");
 const axios = require('axios')
 const Message = require('./models/messageModel');
+const Contact = require('./models/contactModel');
 
 const connectToMongoDB = require('./db/db');
 
@@ -50,6 +51,10 @@ app.post("/webhook",async (req, res) => {
   if (body_params.object) {
     if (body_params.entry && body_params.entry[0].changes && body_params.entry[0].changes[0].value.messages && body_params.entry[0].changes[0].value.messages[0]) {
       let phon_no_id = body_params.entry[0].changes[0].value.metadata.phone_number_id;
+
+      let sender_name=body_params.entry[0].changes[0].contacts[0].profile.name
+      let sender_wa_id=body_params.entry[0].changes[0].contacts[0].wa_id
+
       let from = body_params.entry[0].changes[0].value.messages[0].from;
       let msg_id = body_params.entry[0].changes[0].value.messages[0].id;
       let msg_body = body_params.entry[0].changes[0].value.messages[0].text.body;
@@ -70,6 +75,26 @@ app.post("/webhook",async (req, res) => {
     
         console.log("message saved sucessfully");
       } catch (error) {
+        console.log("error occured");
+      }
+
+      try{
+        const existingContact = await Contact.findOne({ phoneNumber:sender_wa_id  });
+
+        if (!existingContact) {
+          const contact = new Contact({
+            name:sender_name,
+            phoneNumber:sender_wa_id,
+          });
+      
+          await contact.save();
+      
+          console.log("contact saved sucessfully");
+        }else{
+          console.log("contact already there");
+        }
+
+      }catch(error){
         console.log("error occured");
       }
 
