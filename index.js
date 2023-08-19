@@ -52,8 +52,8 @@ app.post("/webhook",async (req, res) => {
     if (body_params.entry && body_params.entry[0].changes && body_params.entry[0].changes[0].value.messages && body_params.entry[0].changes[0].value.messages[0]) {
       let phon_no_id = body_params.entry[0].changes[0].value.metadata.phone_number_id;
 
-      let sender_name=body_params.entry[0].changes[0].contacts[0].profile.name
-      let sender_wa_id=body_params.entry[0].changes[0].contacts[0].wa_id
+      let sender_name=body_params.entry[0].changes[0].value.contacts[0].profile.name
+      let sender_wa_id=body_params.entry[0].changes[0].value.contacts[0].wa_id
 
       let from = body_params.entry[0].changes[0].value.messages[0].from;
       let msg_id = body_params.entry[0].changes[0].value.messages[0].id;
