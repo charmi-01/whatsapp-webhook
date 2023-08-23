@@ -1,6 +1,7 @@
 const express = require('express');
 const body_parser = require("body-parser");
 const axios = require('axios')
+const cors = require('cors');
 const Message = require('./models/messageModel');
 const Contact = require('./models/contactModel');
 
@@ -8,6 +9,8 @@ const connectToMongoDB = require('./db/db');
 
 // Create an Express app
 const app = express().use(body_parser.json());
+
+app.use(cors());
 
 // Connect to MongoDB
 connectToMongoDB();
