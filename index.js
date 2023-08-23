@@ -1,41 +1,28 @@
-const express = require('express');
-const body_parser = require("body-parser");
-const axios = require('axios')
-const cors = require('cors');
+const express = require("express");
+const app = express();
+const cors = require("cors");
 const Message = require('./models/messageModel');
 const Contact = require('./models/contactModel');
 
 const connectToMongoDB = require('./db/db');
 
-// Create an Express app
-const app = express().use(body_parser.json());
-
-app.use(cors());
-
-// Connect to MongoDB
-connectToMongoDB();
-
-
-const http = require('http');
-const server = http.createServer(app);
-const { Server } = require("socket.io");
-const io = new Server(server,{
-  cors:{
-    origin:"*"
-  }
-});
-
-
-
 //tokens
 const token = 'Bearer EAAXQdCcZBoocBO4cHJ7B3tEPbXZBrcz1XrM5DTTDNXwbMm2M4HryOrl090vgfZAY1UboEKruATSTZBTtdnqJoty3Cg7XqNzWR5jBgrs6y1xmUIVZASAInFwLBLGmIVDdRdzKZA9NvlM3c6CddXfQ1XuVOtDhnZCflowtpOGBOwtJWEI3RFDOWgtRp4hRXsB7GRXmji09VRKgflUFL5H'
 const mytoken = "billfree";
 
+connectToMongoDB();
 
 
+app.use(cors());
+app.use(express.json());
+
+const server = app.listen(3000, () => {
+  console.log("Server is up & running 3000");
+});
 
 //to verify working
 app.get('/', (req, res) => {
+  // io.emit('webhookNotification', { message: 'New data from webhook' });
   res.status(200).send("api is working")
 })
 
@@ -90,10 +77,7 @@ app.post("/webhook", async (req, res) => {
 
           await message.save();
 
-          io.on('connection',(socket)=>{
-            console.log('user connected');
-            socket.emit('newMessage',msg_body)
-          })
+          io.emit('webhookNotificationMessage', { message: 'New data from webhook' });
 
           console.log("Message saved successfully");
         } else {
@@ -115,9 +99,7 @@ app.post("/webhook", async (req, res) => {
 
 
           await contact.save();
-          io.on('connection',socket=>{
-            socket.emit('new contact added')
-          })
+          io.emit('webhookNotificationContact', { contact: 'New contact added' });
 
           console.log("contact saved sucessfully");
         } else {
@@ -164,6 +146,18 @@ app.post("/webhook", async (req, res) => {
   }
 })
 
-server.listen(3000, () => {
-  console.log('server is listening on 3000....');
+
+
+io = require("socket.io")(server, {
+  cors: {
+    origin: "*",
+  },
+});
+
+
+io.on("connection", (socket) => {
+  // console.log("Connected & Socket Id is ", socket.id);
+  socket.emit("Data", "first emit data");
+  socket.emit("Temperature", "45 degree c");
+
 });
