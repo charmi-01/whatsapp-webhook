@@ -90,8 +90,9 @@ app.post("/webhook", async (req, res) => {
 
           await message.save();
 
-          io.on('connection',socket=>{
-            socket.emit('new message recieved')
+          io.on('connection',(socket)=>{
+            console.log('user connected');
+            socket.emit('newMessage',msg_body)
           })
 
           console.log("Message saved successfully");
