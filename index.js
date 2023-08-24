@@ -5,6 +5,7 @@ const Message = require('./models/messageModel');
 const Contact = require('./models/contactModel');
 
 const connectToMongoDB = require('./db/db');
+const SentMessage = require("./models/sentMessageModal");
 
 //tokens
 const token = 'Bearer EAAXQdCcZBoocBO4cHJ7B3tEPbXZBrcz1XrM5DTTDNXwbMm2M4HryOrl090vgfZAY1UboEKruATSTZBTtdnqJoty3Cg7XqNzWR5jBgrs6y1xmUIVZASAInFwLBLGmIVDdRdzKZA9NvlM3c6CddXfQ1XuVOtDhnZCflowtpOGBOwtJWEI3RFDOWgtRp4hRXsB7GRXmji09VRKgflUFL5H'
@@ -60,7 +61,7 @@ app.post("/webhook", async (req, res) => {
       let msg_id = body_params.entry[0].changes[0].value.messages[0].id;
       let msg_body = body_params.entry[0].changes[0].value.messages[0].text.body;
       let msg_timestamp = body_params.entry[0].changes[0].value.messages[0].timestamp;
-      let msg_type = body_params.entry[0].changes[0].value.messages[0].type;
+      // let msg_type = body_params.entry[0].changes[0].value.messages[0].type;
 
 
       try {
@@ -72,7 +73,7 @@ app.post("/webhook", async (req, res) => {
             id: msg_id,
             timestamp: msg_timestamp,
             text: msg_body,
-            type: msg_type,
+            type: 'received',
           });
 
           await message.save();
@@ -142,6 +143,35 @@ app.post("/webhook", async (req, res) => {
       res.sendStatus(200);
     } else {
       res.sendStatus(404);
+    }
+  }
+
+  if(body_params.object){
+    if(body_params.entry && body_params.entry[0].changes && body_params.entry[0].changes[0].value.statuses && body_params.entry[0].changes[0].value.statuses[0]){
+      const statusMessageId = body_params.entry[0].changes[0].value.statuses[0].id;
+      try {
+        const existingMessage = await SentMessage.findOne({ id: statusMessageId });
+
+        if (existingMessage) {
+          // Check if additional fields are missing in the message and update them
+          if (!existingMessage.conversationId) {
+            existingMessage.conversationId = body_params.entry[0].changes[0].value.statuses[0].conversation_id;
+          }
+          if (!existingMessage.expirationTimestamp) {
+            existingMessage.expirationTimestamp = body_params.entry[0].changes[0].value.statuses[0].expiration_timestamp;
+          }
+          if (!existingMessage.status ) {
+            existingMessage.status = body_params.entry[0].changes[0].value.statuses[0].status;
+          }
+
+          await existingMessage.save();
+          console.log("Updated message with additional fields");
+        } else {
+          console.log("Message not found in the database");
+        }
+      } catch (error) {
+        console.log("Error occurred while updating message:", error);
+      }
     }
   }
 })
