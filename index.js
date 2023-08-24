@@ -153,14 +153,14 @@ app.post("/webhook", async (req, res) => {
 
         if (existingMessage) {
           // Check if additional fields are missing in the message and update them
-          if (!existingMessage.conversationid) {
+          if (!existingMessage.conversationId) {
             console.log(1);
-            existingMessage.conversationid = body_params.entry[0].changes[0].value.statuses[0].conversation_id;
+            existingMessage.conversationId = body_params.entry[0].changes[0].value.statuses[0].conversation.id;
             console.log(2);
           }
-          if (!existingMessage.expirationtimestamp) {
+          if (!existingMessage.expirationTimestamp) {
             console.log(3);
-            existingMessage.expirationtimestamp = body_params.entry[0].changes[0].value.statuses[0].expiration_timestamp;
+            existingMessage.expirationTimestamp = body_params.entry[0].changes[0].value.statuses[0].conversation.expiration_timestamp;
           }
           if (!existingMessage.status ) {
             existingMessage.status = body_params.entry[0].changes[0].value.statuses[0].status;
