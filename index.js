@@ -8,7 +8,6 @@ const connectToMongoDB = require('./db/db');
 const SentMessage = require("./models/sentMessageModal");
 
 //tokens
-const token = 'Bearer EAAXQdCcZBoocBO4cHJ7B3tEPbXZBrcz1XrM5DTTDNXwbMm2M4HryOrl090vgfZAY1UboEKruATSTZBTtdnqJoty3Cg7XqNzWR5jBgrs6y1xmUIVZASAInFwLBLGmIVDdRdzKZA9NvlM3c6CddXfQ1XuVOtDhnZCflowtpOGBOwtJWEI3RFDOWgtRp4hRXsB7GRXmji09VRKgflUFL5H'
 const mytoken = "billfree";
 
 connectToMongoDB();
@@ -155,9 +154,12 @@ app.post("/webhook", async (req, res) => {
         if (existingMessage) {
           // Check if additional fields are missing in the message and update them
           if (!existingMessage.conversationId) {
+            console.log(1);
             existingMessage.conversationId = body_params.entry[0].changes[0].value.statuses[0].conversation_id;
+            console.log(2);
           }
           if (!existingMessage.expirationTimestamp) {
+            console.log(3);
             existingMessage.expirationTimestamp = body_params.entry[0].changes[0].value.statuses[0].expiration_timestamp;
           }
           if (!existingMessage.status ) {
