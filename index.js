@@ -157,9 +157,12 @@ app.post("/webhook", async (req, res) => {
           existingMessage.timestamp = body_params.entry[0].changes[0].value.statuses[0].timestamp;
           existingMessage.status = body_params.entry[0].changes[0].value.statuses[0].status;
           await existingMessage.save();
+          io.emit('webhookNotificationMessage', { message: 'New data from webhook' });
           console.log("Updated message with additional fields");
+
         }else if(existingMessage && body_params.entry[0].changes[0].value.statuses[0].status==='read' && existingMessage.status !=='read' ){
           existingMessage.status = body_params.entry[0].changes[0].value.statuses[0].status;
+          io.emit('webhookNotificationMessage', { message: 'New data from webhook' });
           await existingMessage.save();
         } 
         else {
