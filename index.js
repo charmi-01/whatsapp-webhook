@@ -145,30 +145,24 @@ app.post("/webhook", async (req, res) => {
     }
   }
 
-  if(body_params.object){
-    if(body_params.entry && body_params.entry[0].changes && body_params.entry[0].changes[0].value.statuses && body_params.entry[0].changes[0].value.statuses[0].status ==='sent'){
+  if (body_params.object) {
+    if (body_params.entry && body_params.entry[0].changes && body_params.entry[0].changes[0].value.statuses && body_params.entry[0].changes[0].value.statuses[0].status) {
       const statusMessageId = body_params.entry[0].changes[0].value.statuses[0].id;
       try {
         const existingMessage = await SentMessage.findOne({ id: statusMessageId });
 
-        if (existingMessage) {
-          // Check if additional fields are missing in the message and update them
-          if (!existingMessage.conversationId) {
-            console.log(1);
-            existingMessage.conversationId = body_params.entry[0].changes[0].value.statuses[0].conversation.id;
-            console.log(2);
-          }
-          if (!existingMessage.expirationTimestamp) {
-            console.log(3);
-            existingMessage.expirationTimestamp = body_params.entry[0].changes[0].value.statuses[0].conversation.expiration_timestamp;
-          }
-          if (!existingMessage.status ) {
-            existingMessage.status = body_params.entry[0].changes[0].value.statuses[0].status;
-          }
-
+        if (existingMessage && !existingMessage.conversationId && !existingMessage.status && !existingMessage.expirationTimestamp && !existingMessage.timestamp) {
+          existingMessage.conversationId = body_params.entry[0].changes[0].value.statuses[0].conversation.id;
+          existingMessage.expirationTimestamp = body_params.entry[0].changes[0].value.statuses[0].conversation.expiration_timestamp;
+          existingMessage.timestamp = body_params.entry[0].changes[0].value.statuses[0].timestamp;
+          existingMessage.status = body_params.entry[0].changes[0].value.statuses[0].status;
           await existingMessage.save();
           console.log("Updated message with additional fields");
-        } else {
+        }else if(existingMessage && body_params.entry[0].changes[0].value.statuses[0].status==='read' && existingMessage.status !=='read' ){
+          existingMessage.status = body_params.entry[0].changes[0].value.statuses[0].status;
+          await existingMessage.save();
+        } 
+        else {
           console.log("Message not found in the database");
         }
       } catch (error) {
