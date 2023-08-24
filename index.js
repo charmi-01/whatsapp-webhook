@@ -146,21 +146,21 @@ app.post("/webhook", async (req, res) => {
   }
 
   if(body_params.object){
-    if(body_params.entry && body_params.entry[0].changes && body_params.entry[0].changes[0].value.statuses && body_params.entry[0].changes[0].value.statuses[0]){
+    if(body_params.entry && body_params.entry[0].changes && body_params.entry[0].changes[0].value.statuses && body_params.entry[0].changes[0].value.statuses[0].status ==='sent'){
       const statusMessageId = body_params.entry[0].changes[0].value.statuses[0].id;
       try {
         const existingMessage = await SentMessage.findOne({ id: statusMessageId });
 
         if (existingMessage) {
           // Check if additional fields are missing in the message and update them
-          if (!existingMessage.conversationId) {
+          if (!existingMessage.conversationid) {
             console.log(1);
-            existingMessage.conversationId = body_params.entry[0].changes[0].value.statuses[0].conversation_id;
+            existingMessage.conversationid = body_params.entry[0].changes[0].value.statuses[0].conversation_id;
             console.log(2);
           }
-          if (!existingMessage.expirationTimestamp) {
+          if (!existingMessage.expirationtimestamp) {
             console.log(3);
-            existingMessage.expirationTimestamp = body_params.entry[0].changes[0].value.statuses[0].expiration_timestamp;
+            existingMessage.expirationtimestamp = body_params.entry[0].changes[0].value.statuses[0].expiration_timestamp;
           }
           if (!existingMessage.status ) {
             existingMessage.status = body_params.entry[0].changes[0].value.statuses[0].status;

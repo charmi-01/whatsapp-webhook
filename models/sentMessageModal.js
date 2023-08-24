@@ -5,8 +5,8 @@ const sentMessageSchema = new mongoose.Schema({
     id: String,
     text: String,
     timestamp: String,
-    conversationId: String,
-    expirationTimestamp: String,
+    conversationid: String,
+    expirationtimestamp: String,
     status: String,
 });
 
