@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
 const messageSchema = new mongoose.Schema({
-    receiver_waba_id: { type: String, maxlength: 256, unique: true },
+    receiver_waba_id: { type: String, maxlength: 256 },
     from: { type: Number, max: 9999999999999 },
     to: { type: Number, max: 9999999999999 },
-    message_id: { type: String, maxlength: 256 },
+    message_id: { type: String, maxlength: 256, unique: true},
     conversation_id: { type: String, maxlength: 256 },
     message_type: {
         type: String,
