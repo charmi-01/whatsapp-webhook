@@ -1,11 +1,10 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const Message = require('./models/messageModel');
-const Contact = require('./models/contactModel');
+const Customer = require('./models/customers');
+const Message = require("./models/message");
 
 const connectToMongoDB = require('./db/db');
-const SentMessage = require("./models/sentMessageModal");
 
 //tokens
 const mytoken = "billfree";
@@ -22,7 +21,6 @@ const server = app.listen(3000, () => {
 
 //to verify working
 app.get('/', (req, res) => {
-  // io.emit('webhookNotification', { message: 'New data from webhook' });
   res.status(200).send("api is working")
 })
 
@@ -52,6 +50,7 @@ app.post("/webhook", async (req, res) => {
   if (body_params.object) {
     if (body_params.entry && body_params.entry[0].changes && body_params.entry[0].changes[0].value.messages && body_params.entry[0].changes[0].value.messages[0]) {
       let phon_no_id = body_params.entry[0].changes[0].value.metadata.phone_number_id;
+      let waba_id = body_params.entry[0].id
 
       let sender_name = body_params.entry[0].changes[0].value.contacts[0].profile.name
       let sender_wa_id = body_params.entry[0].changes[0].value.contacts[0].wa_id
@@ -60,19 +59,48 @@ app.post("/webhook", async (req, res) => {
       let msg_id = body_params.entry[0].changes[0].value.messages[0].id;
       let msg_body = body_params.entry[0].changes[0].value.messages[0].text.body;
       let msg_timestamp = body_params.entry[0].changes[0].value.messages[0].timestamp;
-      // let msg_type = body_params.entry[0].changes[0].value.messages[0].type;
-
+      let msg_type = body_params.entry[0].changes[0].value.messages[0].type;
 
       try {
-        const existingMessage = await Message.findOne({ id: msg_id });
+        const existingCustomer = await Customer.findOne({ waba_id: sender_wa_id });
+
+        if (!existingCustomer) {
+          const customer = new Customer({
+            name: sender_name,
+            waba_id: sender_wa_id,
+            phone: parseInt(sender_wa_id)
+          });
+
+
+          await customer.save();
+          io.emit('webhookNotificationContact', { contact: `New message from ${sender_name}` });
+
+          console.log("contact saved sucessfully");
+        } else {
+          console.log("contact already there");
+        }
+
+      } catch (error) {
+        console.log("error occured");
+      }
+
+      try {
+        const existingMessage = await Message.findOne({ waba_id: msg_id });
 
         if (!existingMessage) {
           const message = new Message({
-            from: from,
-            id: msg_id,
-            timestamp: msg_timestamp,
-            text: msg_body,
-            type: 'received',
+            receiver_waba_id: waba_id,
+            from: parseInt(from),
+            message_id: msg_id,
+            timestamps: {
+              received: msg_timestamp,
+            },
+            messageType: msg_type,
+            cloud_api: {
+              message: {
+                text: msg_body,
+              }
+            }
           });
 
           await message.save();
@@ -88,27 +116,7 @@ app.post("/webhook", async (req, res) => {
       }
 
 
-      try {
-        const existingContact = await Contact.findOne({ phoneNumber: sender_wa_id });
 
-        if (!existingContact) {
-          const contact = new Contact({
-            name: sender_name,
-            phoneNumber: sender_wa_id,
-          });
-
-
-          await contact.save();
-          io.emit('webhookNotificationContact', { contact: 'New contact added' });
-
-          console.log("contact saved sucessfully");
-        } else {
-          console.log("contact already there");
-        }
-
-      } catch (error) {
-        console.log("error occured");
-      }
 
       // let data = JSON.stringify({
       //   "messaging_product": "whatsapp",
@@ -145,34 +153,34 @@ app.post("/webhook", async (req, res) => {
     }
   }
 
-  if (body_params.object) {
-    if (body_params.entry && body_params.entry[0].changes && body_params.entry[0].changes[0].value.statuses && body_params.entry[0].changes[0].value.statuses[0].status) {
-      const statusMessageId = body_params.entry[0].changes[0].value.statuses[0].id;
-      try {
-        const existingMessage = await SentMessage.findOne({ id: statusMessageId });
+  // if (body_params.object) {
+  //   if (body_params.entry && body_params.entry[0].changes && body_params.entry[0].changes[0].value.statuses && body_params.entry[0].changes[0].value.statuses[0].status) {
+  //     const statusMessageId = body_params.entry[0].changes[0].value.statuses[0].id;
+  //     try {
+  //       const existingMessage = await SentMessage.findOne({ id: statusMessageId });
 
-        if (existingMessage && !existingMessage.conversationId && !existingMessage.status && !existingMessage.expirationTimestamp && !existingMessage.timestamp) {
-          existingMessage.conversationId = body_params.entry[0].changes[0].value.statuses[0].conversation.id;
-          existingMessage.expirationTimestamp = body_params.entry[0].changes[0].value.statuses[0].conversation.expiration_timestamp;
-          existingMessage.timestamp = body_params.entry[0].changes[0].value.statuses[0].timestamp;
-          existingMessage.status = body_params.entry[0].changes[0].value.statuses[0].status;
-          io.emit('webhookNotificationMessage', { message: 'New data from webhook' });
-          await existingMessage.save();
-          console.log("Updated message with additional fields");
+  //       if (existingMessage && !existingMessage.conversationId && !existingMessage.status && !existingMessage.expirationTimestamp && !existingMessage.timestamp) {
+  //         existingMessage.conversationId = body_params.entry[0].changes[0].value.statuses[0].conversation.id;
+  //         existingMessage.expirationTimestamp = body_params.entry[0].changes[0].value.statuses[0].conversation.expiration_timestamp;
+  //         existingMessage.timestamp = body_params.entry[0].changes[0].value.statuses[0].timestamp;
+  //         existingMessage.status = body_params.entry[0].changes[0].value.statuses[0].status;
+  //         io.emit('webhookNotificationMessage', { message: 'New data from webhook' });
+  //         await existingMessage.save();
+  //         console.log("Updated message with additional fields");
 
-        }else if(existingMessage && body_params.entry[0].changes[0].value.statuses[0].status==='read' && existingMessage.status !=='read' ){
-          existingMessage.status = body_params.entry[0].changes[0].value.statuses[0].status;
-          io.emit('webhookNotificationMessage', { message: 'New data from webhook' });
-          await existingMessage.save();
-        } 
-        else {
-          console.log("Message not found in the database");
-        }
-      } catch (error) {
-        console.log("Error occurred while updating message:", error);
-      }
-    }
-  }
+  //       } else if (existingMessage && body_params.entry[0].changes[0].value.statuses[0].status === 'read' && existingMessage.status !== 'read') {
+  //         existingMessage.status = body_params.entry[0].changes[0].value.statuses[0].status;
+  //         io.emit('webhookNotificationMessage', { message: 'New data from webhook' });
+  //         await existingMessage.save();
+  //       }
+  //       else {
+  //         console.log("Message not found in the database");
+  //       }
+  //     } catch (error) {
+  //       console.log("Error occurred while updating message:", error);
+  //     }
+  //   }
+  // }
 })
 
 
