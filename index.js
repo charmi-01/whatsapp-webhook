@@ -85,7 +85,7 @@ app.post("/webhook", async (req, res) => {
       }
 
       try {
-        const existingMessage = await Message.findOne({ waba_id: msg_id });
+        const existingMessage = await Message.findOne({ message_id: msg_id });
 
         if (!existingMessage) {
           const message = new Message({
