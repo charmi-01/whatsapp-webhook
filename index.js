@@ -91,9 +91,9 @@ app.post("/webhook", async (req, res) => {
 
         if (!existingMessage) {
           const message = new Message({
+            message_id: msg_id,
             receiver_waba_id: waba_id,
             from: parseInt(from),
-            message_id: msg_id,
             timestamps: {
               received: msg_timestamp,
             },
