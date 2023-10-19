@@ -95,7 +95,7 @@ app.post("/webhook", async (req, res) => {
             receiver_waba_id: waba_id,
             from: parseInt(from),
             timestamps: {
-              received: msg_timestamp,
+              received:  new Date(Number(msg_timestamp)*1000),
             },
             messageType: msg_type,
             cloud_api: {
