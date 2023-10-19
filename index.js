@@ -95,7 +95,7 @@ app.post("/webhook", async (req, res) => {
             receiver_waba_id: waba_id,
             from: parseInt(from),
             timestamps: {
-              received:  new Date(Number(msg_timestamp)*1000),
+              received: new Date(Number(msg_timestamp) * 1000),
             },
             messageType: msg_type,
             cloud_api: {
@@ -106,6 +106,14 @@ app.post("/webhook", async (req, res) => {
           });
 
           await message.save();
+
+          // Update the customer's last message based on the phone number
+          const customer = await Customer.findOne({ phone: parseInt(from) });
+          if (customer) {
+            customer.lastMessage.message = msg_body;
+            customer.lastMessage.time= new Date(Number(msg_timestamp) * 1000)
+            await customer.save();
+          }
 
           io.emit('webhookNotificationMessageRecieved', { message: message });
 
