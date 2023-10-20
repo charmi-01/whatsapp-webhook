@@ -47,6 +47,7 @@ app.post("/webhook", async (req, res) => {
 
   console.log(JSON.stringify(body_params, null, 2));
 
+  //received message
   if (body_params.object) {
     if (body_params.entry && body_params.entry[0].changes && body_params.entry[0].changes[0].value.messages && body_params.entry[0].changes[0].value.messages[0]) {
       let phon_no_id = body_params.entry[0].changes[0].value.metadata.phone_number_id;
@@ -111,7 +112,7 @@ app.post("/webhook", async (req, res) => {
           const customer = await Customer.findOne({ phone: parseInt(from) });
           if (customer) {
             customer.lastMessage.message = msg_body;
-            customer.lastMessage.time= new Date(Number(msg_timestamp) * 1000)
+            customer.lastMessage.time = new Date(Number(msg_timestamp) * 1000)
             await customer.save();
           }
 
@@ -124,10 +125,6 @@ app.post("/webhook", async (req, res) => {
       } catch (error) {
         console.log("Error occurred while saving message:", error);
       }
-
-
-
-
       // let data = JSON.stringify({
       //   "messaging_product": "whatsapp",
       //   "to": from,
@@ -163,34 +160,39 @@ app.post("/webhook", async (req, res) => {
     }
   }
 
-  // if (body_params.object) {
-  //   if (body_params.entry && body_params.entry[0].changes && body_params.entry[0].changes[0].value.statuses && body_params.entry[0].changes[0].value.statuses[0].status) {
-  //     const statusMessageId = body_params.entry[0].changes[0].value.statuses[0].id;
-  //     try {
-  //       const existingMessage = await SentMessage.findOne({ id: statusMessageId });
+  //sent message
+  if (body_params.object) {
+    if (body_params.entry && body_params.entry[0].changes && body_params.entry[0].changes[0].value.statuses && body_params.entry[0].changes[0].value.statuses[0].status) {
+      const statusMessageId = body_params.entry[0].changes[0].value.statuses[0].id;
+      try {
+        const existingMessage = await Message.findOne({ message_id: statusMessageId });
 
-  //       if (existingMessage && !existingMessage.conversationId && !existingMessage.status && !existingMessage.expirationTimestamp && !existingMessage.timestamp) {
-  //         existingMessage.conversationId = body_params.entry[0].changes[0].value.statuses[0].conversation.id;
-  //         existingMessage.expirationTimestamp = body_params.entry[0].changes[0].value.statuses[0].conversation.expiration_timestamp;
-  //         existingMessage.timestamp = body_params.entry[0].changes[0].value.statuses[0].timestamp;
-  //         existingMessage.status = body_params.entry[0].changes[0].value.statuses[0].status;
-  //         io.emit('webhookNotificationMessage', { message: 'New data from webhook' });
-  //         await existingMessage.save();
-  //         console.log("Updated message with additional fields");
+        if (existingMessage && !existingMessage.conversation_id && body_params.entry[0].changes[0].value.statuses[0].status === 'sent') {
+          existingMessage.conversation_id = body_params.entry[0].changes[0].value.statuses[0].conversation.id;
+          existingMessage.timestamps.sent.expiry_timestamp =new Date(Number(body_params.entry[0].changes[0].value.statuses[0].conversation.expiration_timestamp) * 1000) ;
+          existingMessage.timestamps.sent.timestamp = new Date(Number(body_params.entry[0].changes[0].value.statuses[0].timestamp) * 1000);
+          existingMessage.timestamps.sent.billable=body_params.entry[0].changes[0].value.statuses[0].pricing.billable
+          existingMessage.timestamps.sent.pricing_model=body_params.entry[0].changes[0].value.statuses[0].pricing.pricing_model
+          existingMessage.timestamps.sent.category=body_params.entry[0].changes[0].value.statuses[0].pricing.category
+          existingMessage.timestamps.sent.origin_type = body_params.entry[0].changes[0].value.statuses[0].conversation.origin.type;
+          io.emit('webhookNotificationMessage', { message: 'New data from webhook' });
+          await existingMessage.save();
+          console.log("Updated message with additional fields");
 
-  //       } else if (existingMessage && body_params.entry[0].changes[0].value.statuses[0].status === 'read' && existingMessage.status !== 'read') {
-  //         existingMessage.status = body_params.entry[0].changes[0].value.statuses[0].status;
-  //         io.emit('webhookNotificationMessage', { message: 'New data from webhook' });
-  //         await existingMessage.save();
-  //       }
-  //       else {
-  //         console.log("Message not found in the database");
-  //       }
-  //     } catch (error) {
-  //       console.log("Error occurred while updating message:", error);
-  //     }
-  //   }
-  // }
+        } else if (existingMessage && body_params.entry[0].changes[0].value.statuses[0].status === 'read' && !existingMessage.timestamps.read) {
+          existingMessage.timestamps.read.timestamp = new Date(Number(body_params.entry[0].changes[0].value.statuses[0].timestamp) * 1000);
+          io.emit('webhookNotificationMessage', { message: 'New data from webhook' });
+          await existingMessage.save();
+        }
+        else {
+          console.log("Message not found in the database");
+        }
+      } catch (error) {
+        console.log("Error occurred while updating message:", error);
+      }
+    }
+  }
+
 })
 
 
