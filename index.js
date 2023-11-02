@@ -96,7 +96,9 @@ app.post("/webhook", async (req, res) => {
             receiver_waba_id: waba_id,
             from: parseInt(from),
             timestamps: {
-              received: new Date(Number(msg_timestamp) * 1000),
+              received: {
+                timestamp:new Date(Number(msg_timestamp) * 1000),
+              } 
             },
             messageType: msg_type,
             cloud_api: {
@@ -113,6 +115,18 @@ app.post("/webhook", async (req, res) => {
           if (customer) {
             customer.lastMessage.message = msg_body;
             customer.lastMessage.time = new Date(Number(msg_timestamp) * 1000)
+
+            if (customer.lastMessage.expiry_timestamp  ) {
+              // Set customer.lastMessage.expiration to the current time plus one day
+              if ( customer.lastMessage.expiry_timestamp <  customer.lastMessage.time){
+                const oneDayInMilliseconds = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+                customer.lastMessage.expiry_timestamp = new Date(Number(msg_timestamp) * 1000 + oneDayInMilliseconds);
+              }
+            }else{
+              const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
+              customer.lastMessage.expiry_timestamp = new Date(Number(msg_timestamp) * 1000 + oneDayInMilliseconds);
+            }
+
             await customer.save();
           }
 

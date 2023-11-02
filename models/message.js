@@ -188,7 +188,9 @@ const messageSchema = new mongoose.Schema({
         read: {
             timestamp: Date,
         },
-        received : Date,
+        received : {
+            timestamp:Date,
+        },
         failed: {
             timestamp: Date,
             errors: [
