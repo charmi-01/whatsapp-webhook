@@ -194,7 +194,7 @@ app.post("/webhook", async (req, res) => {
           console.log("Updated message with additional fields(sent)");
 
         } 
-        if (existingMessage && body_params.entry[0].changes[0].value.statuses[0].status === 'read' && !existingMessage.timestamps.read) {
+        if (existingMessage && body_params.entry[0].changes[0].value.statuses[0].status === 'read' && !existingMessage.timestamps.read.timestamp) {
           existingMessage.timestamps.read.timestamp = new Date(Number(body_params.entry[0].changes[0].value.statuses[0].timestamp) * 1000);
           io.emit('webhookNotificationMessage', { message: 'New data from webhook' });
           await existingMessage.save();
@@ -202,7 +202,7 @@ app.post("/webhook", async (req, res) => {
         }else {
           console.log("Message not found in the database");
         }
-        
+
       } catch (error) {
         console.log("Error occurred while updating message:", error);
       }
