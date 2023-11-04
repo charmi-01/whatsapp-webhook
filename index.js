@@ -113,10 +113,12 @@ app.post("/webhook", async (req, res) => {
           // Update the customer's last message based on the phone number
           const customer = await Customer.findOne({ phone: parseInt(from) });
           if (customer) {
+            console.log("tiii");
             customer.lastMessage.message = msg_body;
             customer.lastMessage.time = new Date(Number(msg_timestamp) * 1000)
-
+            console.log(customer.lastMessage);
             if (customer.lastMessage.expiry_timestamp  ) {
+              console.log("hiiii");
               // Set customer.lastMessage.expiration to the current time plus one day
               if ( customer.lastMessage.expiry_timestamp <  customer.lastMessage.time){
                 const oneDayInMilliseconds = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
@@ -182,6 +184,22 @@ app.post("/webhook", async (req, res) => {
         const existingMessage = await Message.findOne({ message_id: statusMessageId });
 
         if (existingMessage && !existingMessage.conversation_id && body_params.entry[0].changes[0].value.statuses[0].status === 'sent') {
+          const recipientId = body_params.entry[0].changes[0].value.statuses[0].recipient_id;
+
+          const customer = await Customer.findOne({ phone: Number(recipientId) });
+
+          if (customer) {
+            // Update customer's last message timestamp and expiration timestamp
+            if( existingMessage.cloud_api.message && existingMessage.cloud_api.message.text){
+              customer.lastMessage.message= existingMessage.cloud_api.message.text
+            }
+            customer.lastMessage.time = new Date(Number(body_params.entry[0].changes[0].value.statuses[0].timestamp) * 1000);
+            customer.lastMessage.expiry_timestamp = new Date(Number(body_params.entry[0].changes[0].value.statuses[0].conversation.expiration_timestamp) * 1000);
+  
+            // Save the customer changes
+            await customer.save();
+          }
+
           existingMessage.conversation_id = body_params.entry[0].changes[0].value.statuses[0].conversation.id;
           existingMessage.timestamps.sent.expiry_timestamp =new Date(Number(body_params.entry[0].changes[0].value.statuses[0].conversation.expiration_timestamp) * 1000) ;
           existingMessage.timestamps.sent.timestamp = new Date(Number(body_params.entry[0].changes[0].value.statuses[0].timestamp) * 1000);
